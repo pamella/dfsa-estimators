@@ -4,10 +4,6 @@ import time
 from matplotlib import pyplot as plt
 
 
-# class Estimator:
-#     def __init__(self, *args, **kwargs):
-
-
 def graph_plot(x_values, y_values, x_label, y_label, file_name):
     plt.xlabel(x_label)
     plt.ylabel(y_label)
