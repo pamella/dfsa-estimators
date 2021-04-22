@@ -1,0 +1,15 @@
+*.pyc
+__pycache__/
+
+#vscode
+.vscode/
+
+# pycharm
+.idea
+
+# General
+/venv/
+/env/
+/output/
+/cache/
+/build/
