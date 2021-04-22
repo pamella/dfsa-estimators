@@ -1,11 +1,13 @@
-﻿# dfsa-estimators
+﻿# DFSA Estimators
  
  ## Requisitos
  - Python 3
  - Matplotlib
 
-## Como rodar
+## Simulações disponíveis
+- Lower Bound
 
+## Como rodar
 1. Clone o projeto
 2. No shell, rode:
    ```bash
