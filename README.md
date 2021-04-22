@@ -17,4 +17,5 @@
    ```bash
    python main.py
    ```
+3. Gráficos gerados são salvos na pasta `graph_plots/`   
    
