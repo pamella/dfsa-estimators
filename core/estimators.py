@@ -13,6 +13,56 @@ def graph_plot(x_values, y_values, x_label, y_label, file_name):
     plt.close()
 
 
+def lower_bound(collisions):
+    return collisions * 2
+
+
+def eom_lee():
+    raise NotImplementedError("Eom-Lee has not been implemented.")
+
+
+def dfsa(estimator, current_tag, current_frame):
+    total_slots = current_frame
+    total_collisions = 0
+    total_empty = 0
+
+    start_time = time.time()
+    while current_tag > 0:
+        frame = [0] * current_frame
+
+        success = 0
+        collisions = 0
+        empty = 0
+
+        for i in range(current_tag):
+            random_index = random.randrange(current_frame)
+            frame[random_index] += 1
+
+        for i in range(current_frame):
+            if frame[i] == 0:
+                empty += 1
+            elif frame[i] == 1:
+                success += 1
+            elif frame[i] >= 2:
+                collisions += 1
+
+        current_tag -= success
+        if estimator == 0:
+            current_frame = lower_bound(collisions)
+        elif estimator == 1:
+            current_frame = eom_lee()
+        else:
+            raise NotImplementedError()
+        total_collisions += collisions
+        total_slots += current_frame
+        total_empty += empty
+
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    return total_collisions, total_slots, total_empty, total_time
+
+
 def simulate(
     estimator,
     initial_tag_amount,
@@ -22,143 +72,76 @@ def simulate(
     initial_frame_size,
 ):
     list_tags_interval = []
-    list_average_slots = []
-    list_average_idles = []
-    list_average_collisions = []
-    list_average_success = []
-    list_average_time = []
+    list_avg_collisions = []
+    list_avg_slots = []
+    list_avg_empty = []
+    list_avg_time = []
 
-    for index in range(1, int(max_tag_amount / initial_tag_amount) + 1):
-        tag_ammount = index * tag_increment_interval
-        list_tags_interval.append(tag_ammount)
+    for tag_index in range(1, int(max_tag_amount / initial_tag_amount) + 1):
+        tags = tag_index * tag_increment_interval
 
-        average_slots = 0
-        average_idles = 0
-        average_collisions = 0
-        average_success = 0
-        average_time = 0
+        current_tag = tags
+        current_frame = initial_frame_size
 
-        for repetition in range(max_repetition):
-            frameSize = initial_frame_size
+        avg_collisions = 0.0
+        avg_slots = 0.0
+        avg_empty = 0.0
+        avg_time = 0.0
 
-            start_time = time.time()
-            if estimator == 0:
-                (
-                    interaction_slots,
-                    interaction_idles,
-                    interaction_collisions,
-                    interaction_success,
-                ) = lower_bound(tag_ammount, frameSize)
-                average_slots += interaction_slots
-                average_idles += interaction_idles
-                average_collisions += interaction_collisions
-                average_success += interaction_success
-            if estimator == 1:
-                eom_lee()
-            end_time = time.time()
-            interaction_time = end_time - start_time
-            average_time += interaction_time
+        current_repetition = max_repetition
 
-        list_average_slots.append(average_slots / max_repetition)
-        list_average_idles.append(average_idles / max_repetition)
-        list_average_collisions.append(average_collisions / max_repetition)
-        list_average_success.append(average_success / max_repetition)
-        list_average_time.append(average_time / max_repetition)
+        for i in range(current_repetition):
+            current_tag = tags
+            current_frame = initial_frame_size
 
-        print(
-            list_tags_interval,
-            list_average_slots,
-            list_average_idles,
-            list_average_collisions,
-            list_average_success,
-            list_average_time,
-        )
+            total_collisions, total_slots, total_empty, total_time = dfsa(
+                estimator, current_tag, current_frame
+            )
 
-    list_average_efficiency = [
-        (list_average_success[i] / list_average_slots[i])
-        for i in range(len(list_tags_interval))
-    ]
+            avg_collisions += total_collisions
+            avg_slots += total_slots
+            avg_empty += total_empty
+            avg_time += total_time
+
+        avg_collisions /= current_repetition
+        avg_slots /= current_repetition
+        avg_empty /= current_repetition
+        avg_time /= current_repetition
+
+        list_avg_collisions.append(avg_collisions)
+        list_avg_slots.append(avg_slots)
+        list_avg_empty.append(avg_empty)
+        list_avg_time.append(avg_time)
+
+        list_tags_interval.append(tags)
+
+        print(list_tags_interval, list_avg_collisions, list_avg_slots, list_avg_empty)
 
     graph_plot(
         list_tags_interval,
-        list_average_slots,
-        "Número de Etiquetas",
-        "Número de Slots Vazios",
-        "lb_n_idle",
-    )
-    graph_plot(
-        list_tags_interval,
-        list_average_idles,
-        "Número de Etiquetas",
-        "Número de Slots",
-        "lb_n_slots",
-    )
-    graph_plot(
-        list_tags_interval,
-        list_average_collisions,
+        list_avg_collisions,
         "Número de Etiquetas",
         "Número de Slots em Colisão",
         "lb_n_collisions",
     )
     graph_plot(
         list_tags_interval,
-        list_average_efficiency,
+        list_avg_slots,
         "Número de Etiquetas",
-        "Eficiência (total de sucessos / total de slots)",
-        "lb_n_efficiency",
+        "Número de Slots Vazios",
+        "lb_n_idle",
     )
     graph_plot(
         list_tags_interval,
-        list_average_time,
+        list_avg_empty,
         "Número de Etiquetas",
-        "Tempo para Identificação (s)",
+        "Número de Slots",
+        "lb_n_slots",
+    )
+    graph_plot(
+        list_tags_interval,
+        list_avg_time,
+        "Número de Etiquetas",
+        "Tempo para Identificação (sec)",
         "lb_n_time",
     )
-
-    return (
-        list_average_slots,
-        list_average_idles,
-        list_average_collisions,
-        list_average_time,
-    )
-
-
-def lower_bound(
-    tag_ammount,
-    frameSize,
-):
-    total_slots = 0
-    total_idles = 0
-    total_collisions = 0
-    total_success = 0
-
-    slots = [0] * 2000
-    while tag_ammount > 0:
-        total_slots += frameSize
-
-        # Fulfill slots
-        for _ in range(tag_ammount):
-            random_slot = random.randrange(frameSize)
-            slots[random_slot] += 1
-
-        # Check for idles, sucess, and collisions
-        local_success = 0
-        local_collisions = 0
-        for f in range(frameSize):
-            if slots[f] == 0:
-                total_idles += 1
-            elif slots[f] == 1:
-                local_success += 1
-            else:
-                local_collisions += 1
-
-        tag_ammount -= local_success
-        frameSize = local_collisions * 2
-        total_collisions += local_collisions
-        total_success += local_success
-
-    return total_slots, total_idles, total_collisions, total_success
-
-
-def eom_lee():
-    raise NotImplementedError("Eom-Lee has not been implemented.")
