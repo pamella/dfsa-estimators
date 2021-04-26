@@ -1,13 +1,14 @@
+import math
 import random
 import time
 
 from matplotlib import pyplot as plt
 
 
-def graph_plot(x_values, y_values, x_label, y_label, file_name):
+def graph_plot(x_values, y_values, x_label, y_label, file_name, color="blue"):
     plt.xlabel(x_label)
     plt.ylabel(y_label)
-    plt.plot(x_values, y_values, linewidth=2)
+    plt.plot(x_values, y_values, linewidth=2, color=color)
     plt.grid()
     plt.savefig(f"graph_plots/{file_name}.png")
     plt.close()
@@ -17,8 +18,23 @@ def lower_bound(collisions):
     return collisions * 2
 
 
-def eom_lee():
-    raise NotImplementedError("Eom-Lee has not been implemented.")
+def eom_lee(collisions, success, frame_size):
+    EPS = 1e-3
+    gama0 = 0.0
+    gama1 = 2.0
+    beta = 0.0
+    exp = 0.0
+
+    while True:
+        gama0 = gama1
+        beta = frame_size / (gama0 * collisions + success)
+        exp = math.exp(-1.0 / beta)
+        gama1 = (1.0 - exp) / (beta * (1.0 - ((1.0 + (1.0 / beta)) * exp)))
+
+        if not abs(gama0 - gama1) >= EPS:
+            break
+
+    return int(gama1 * collisions)
 
 
 def dfsa(estimator, current_tag, current_frame):
@@ -50,7 +66,7 @@ def dfsa(estimator, current_tag, current_frame):
         if estimator == 0:
             current_frame = lower_bound(collisions)
         elif estimator == 1:
-            current_frame = eom_lee()
+            current_frame = eom_lee(collisions, success, current_frame)
         else:
             raise NotImplementedError()
         total_collisions += collisions
@@ -117,31 +133,42 @@ def simulate(
 
         print(list_tags_interval, list_avg_collisions, list_avg_slots, list_avg_empty)
 
+    graph_plot_file_name_prefix = ""
+    if estimator == 0:
+        graph_plot_file_name_prefix = "lower_bound"
+        color = "blue"
+    if estimator == 1:
+        graph_plot_file_name_prefix = "eom_lee"
+        color = "green"
     graph_plot(
         list_tags_interval,
         list_avg_collisions,
         "Número de Etiquetas",
         "Número de Slots em Colisão",
-        "lb_n_collisions",
+        f"{graph_plot_file_name_prefix}_n_collisions",
+        color=color,
     )
     graph_plot(
         list_tags_interval,
         list_avg_slots,
         "Número de Etiquetas",
         "Número de Slots Vazios",
-        "lb_n_idle",
+        f"{graph_plot_file_name_prefix}_n_idle",
+        color=color,
     )
     graph_plot(
         list_tags_interval,
         list_avg_empty,
         "Número de Etiquetas",
         "Número de Slots",
-        "lb_n_slots",
+        f"{graph_plot_file_name_prefix}_n_slots",
+        color=color,
     )
     graph_plot(
         list_tags_interval,
         list_avg_time,
         "Número de Etiquetas",
         "Tempo para Identificação (sec)",
-        "lb_n_time",
+        f"{graph_plot_file_name_prefix}_n_time",
+        color=color,
     )
