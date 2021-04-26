@@ -6,6 +6,7 @@
 
 ## Simulações disponíveis
 - Lower Bound
+- Eom-Lee
 
 ## Como rodar
 1. Clone o projeto
