@@ -29,7 +29,6 @@ def simulate(
     list_average_time = []
 
     for index in range(1, int(max_tag_amount / initial_tag_amount) + 1):
-        # for index in range(int(max_tag_amount / initial_tag_amount)):
         tag_ammount = index * tag_increment_interval
         list_tags_interval.append(tag_ammount)
 
@@ -40,6 +39,7 @@ def simulate(
         average_time = 0
 
         for repetition in range(max_repetition):
+            frameSize = initial_frame_size
 
             start_time = time.time()
             if estimator == 0:
@@ -48,7 +48,7 @@ def simulate(
                     interaction_idles,
                     interaction_collisions,
                     interaction_success,
-                ) = lower_bound(tag_ammount, initial_frame_size)
+                ) = lower_bound(tag_ammount, frameSize)
                 average_slots += interaction_slots
                 average_idles += interaction_idles
                 average_collisions += interaction_collisions
@@ -59,21 +59,11 @@ def simulate(
             interaction_time = end_time - start_time
             average_time += interaction_time
 
-        list_average_slots.append(
-            sum(list_average_slots) + (average_slots / max_repetition)
-        )
-        list_average_idles.append(
-            sum(list_average_idles) + (average_idles / max_repetition)
-        )
-        list_average_collisions.append(
-            sum(list_average_collisions) + (average_collisions / max_repetition)
-        )
-        list_average_success.append(
-            sum(list_average_success) + (average_success / max_repetition)
-        )
-        list_average_time.append(
-            sum(list_average_time) + (average_time / max_repetition)
-        )
+        list_average_slots.append(average_slots / max_repetition)
+        list_average_idles.append(average_idles / max_repetition)
+        list_average_collisions.append(average_collisions / max_repetition)
+        list_average_success.append(average_success / max_repetition)
+        list_average_time.append(average_time / max_repetition)
 
         print(
             list_tags_interval,
@@ -142,8 +132,8 @@ def lower_bound(
     total_collisions = 0
     total_success = 0
 
-    slots = [0] * frameSize
-    while frameSize:
+    slots = [0] * 2000
+    while tag_ammount > 0:
         total_slots += frameSize
 
         # Fulfill slots
@@ -159,11 +149,11 @@ def lower_bound(
                 total_idles += 1
             elif slots[f] == 1:
                 local_success += 1
-            elif slots[f] >= 2:
+            else:
                 local_collisions += 1
 
         tag_ammount -= local_success
-        frameSize = int(local_collisions / 2)
+        frameSize = local_collisions * 2
         total_collisions += local_collisions
         total_success += local_success
 
