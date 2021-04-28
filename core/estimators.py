@@ -195,7 +195,7 @@ def simulation_plot_graphs(estimator_results):
         plt.legend()
         plt.grid(True)
         plt.savefig(
-            f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_idle.png"
+            f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_slots.png"
         )
     plt.close()
 
@@ -217,7 +217,7 @@ def simulation_plot_graphs(estimator_results):
         plt.legend()
         plt.grid(True)
         plt.savefig(
-            f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_slots.png"
+            f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_empty.png"
         )
     plt.close()
 
