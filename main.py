@@ -6,7 +6,7 @@ def main():
     print("\nPlease enter the requested params below.")
 
     try:
-        estimator = int(input("Estimator (type 0 for Lower Bound, 1 for Eom-Lee): "))
+        estimator = int(input("Estimator (type 0 for Lower Bound, 1 for Eom-Lee, 2 for compare Lower Bound and Eom-Lee): "))
     except Exception:
         estimator = 0
 

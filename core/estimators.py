@@ -4,16 +4,6 @@ import time
 
 from matplotlib import pyplot as plt
 
-
-def graph_plot(x_values, y_values, x_label, y_label, file_name, color="blue"):
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.plot(x_values, y_values, linewidth=2, color=color)
-    plt.grid()
-    plt.savefig(f"graph_plots/{file_name}.png")
-    plt.close()
-
-
 def lower_bound(collisions):
     return collisions * 2
 
@@ -80,95 +70,120 @@ def dfsa(estimator, current_tag, current_frame):
 
 
 def simulate(
-    estimator,
+    estimators,
     initial_tag_amount,
     max_tag_amount,
     tag_increment_interval,
     max_repetition,
     initial_frame_size,
 ):
-    list_tags_interval = []
-    list_avg_collisions = []
-    list_avg_slots = []
-    list_avg_empty = []
-    list_avg_time = []
+    estimator_results = {}
 
-    for tag_index in range(1, int(max_tag_amount / initial_tag_amount) + 1):
-        tags = tag_index * tag_increment_interval
+    for estimator in range(1 if estimators == 0 else estimators):
+        if estimators == 1:
+            estimator = 1
+        if estimators == 0:
+            estimator = 0
 
-        current_tag = tags
-        current_frame = initial_frame_size
+        list_tags_interval = []
+        list_avg_collisions = []
+        list_avg_slots = []
+        list_avg_empty = []
+        list_avg_time = []
+        for tag_index in range(1, int(max_tag_amount / initial_tag_amount) + 1):
+            tags = tag_index * tag_increment_interval
 
-        avg_collisions = 0.0
-        avg_slots = 0.0
-        avg_empty = 0.0
-        avg_time = 0.0
-
-        current_repetition = max_repetition
-
-        for i in range(current_repetition):
             current_tag = tags
             current_frame = initial_frame_size
 
-            total_collisions, total_slots, total_empty, total_time = dfsa(
-                estimator, current_tag, current_frame
-            )
+            avg_collisions = 0.0
+            avg_slots = 0.0
+            avg_empty = 0.0
+            avg_time = 0.0
 
-            avg_collisions += total_collisions
-            avg_slots += total_slots
-            avg_empty += total_empty
-            avg_time += total_time
+            current_repetition = max_repetition
 
-        avg_collisions /= current_repetition
-        avg_slots /= current_repetition
-        avg_empty /= current_repetition
-        avg_time /= current_repetition
+            for i in range(current_repetition):
+                current_tag = tags
+                current_frame = initial_frame_size
 
-        list_avg_collisions.append(avg_collisions)
-        list_avg_slots.append(avg_slots)
-        list_avg_empty.append(avg_empty)
-        list_avg_time.append(avg_time)
+                total_collisions, total_slots, total_empty, total_time = dfsa(
+                    estimator, current_tag, current_frame
+                )
 
-        list_tags_interval.append(tags)
+                avg_collisions += total_collisions
+                avg_slots += total_slots
+                avg_empty += total_empty
+                avg_time += total_time
 
-        print(list_tags_interval, list_avg_collisions, list_avg_slots, list_avg_empty)
+            avg_collisions /= current_repetition
+            avg_slots /= current_repetition
+            avg_empty /= current_repetition
+            avg_time /= current_repetition
 
-    graph_plot_file_name_prefix = ""
-    if estimator == 0:
-        graph_plot_file_name_prefix = "lower_bound"
-        color = "blue"
-    if estimator == 1:
-        graph_plot_file_name_prefix = "eom_lee"
-        color = "green"
-    graph_plot(
-        list_tags_interval,
-        list_avg_collisions,
-        "Número de Etiquetas",
-        "Número de Slots em Colisão",
-        f"{graph_plot_file_name_prefix}_n_collisions",
-        color=color,
-    )
-    graph_plot(
-        list_tags_interval,
-        list_avg_slots,
-        "Número de Etiquetas",
-        "Número de Slots Vazios",
-        f"{graph_plot_file_name_prefix}_n_idle",
-        color=color,
-    )
-    graph_plot(
-        list_tags_interval,
-        list_avg_empty,
-        "Número de Etiquetas",
-        "Número de Slots",
-        f"{graph_plot_file_name_prefix}_n_slots",
-        color=color,
-    )
-    graph_plot(
-        list_tags_interval,
-        list_avg_time,
-        "Número de Etiquetas",
-        "Tempo para Identificação (sec)",
-        f"{graph_plot_file_name_prefix}_n_time",
-        color=color,
-    )
+            list_avg_collisions.append(avg_collisions)
+            list_avg_slots.append(avg_slots)
+            list_avg_empty.append(avg_empty)
+            list_avg_time.append(avg_time)
+
+            list_tags_interval.append(tags)
+
+            print(list_tags_interval, list_avg_collisions, list_avg_slots, list_avg_empty)
+        graph_plot_file_name_prefix = ""
+        if estimator == 0:
+            graph_plot_file_name_prefix = "lower_bound"
+        if estimator == 1:
+            graph_plot_file_name_prefix = "eom_lee"
+        if estimators == 2:
+            graph_plot_file_name_prefix = "lower_boundxeom_lee"
+        estimator_results[estimator] = {
+            "graph_plot_file_name_prefix": graph_plot_file_name_prefix,
+            "list_tags_interval": list_tags_interval,
+            "list_avg_collisions": list_avg_collisions,
+            "list_avg_slots": list_avg_slots,
+            "list_avg_empty": list_avg_empty,
+            "list_avg_time": list_avg_time
+        }
+
+        simulation_plot_graphs(estimator_results)
+
+
+def simulation_plot_graphs(estimator_results):
+    colors = ["blue", "green"]
+    labels = ["Lower Bound", "Eom-Lee"]
+    for result in estimator_results:
+        plt.xlabel("Número de Etiquetas")
+        plt.ylabel("Número de Slots em Colisão")
+        plt.plot(estimator_results[result]['list_tags_interval'], estimator_results[result]['list_avg_collisions'], linewidth=2, color=colors[result], label=labels[result])
+        plt.legend()
+        plt.grid()
+        plt.savefig(f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_collisions.png")
+    plt.close()
+
+    for result in estimator_results:
+        plt.xlabel("Número de Etiquetas")
+        plt.ylabel("Número de Slots em Colisão")
+        plt.plot(estimator_results[result]['list_tags_interval'], estimator_results[result]['list_avg_slots'], linewidth=2, color=colors[result], label=labels[result])
+        plt.legend()
+        plt.grid()
+        plt.savefig(f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_idle.png")
+    plt.close()
+
+    for result in estimator_results:
+        plt.xlabel("Número de Etiquetas")
+        plt.ylabel("Número de Slots em Colisão")
+        plt.plot(estimator_results[result]['list_tags_interval'], estimator_results[result]['list_avg_empty'], linewidth=2, color=colors[result], label=labels[result])
+        plt.legend()
+        plt.grid()
+        plt.savefig(f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_slots.png")
+    plt.close()
+
+    for result in estimator_results:
+        plt.xlabel("Número de Etiquetas")
+        plt.ylabel("Número de Slots em Colisão")
+        plt.plot(estimator_results[result]['list_tags_interval'], estimator_results[result]['list_avg_time'], linewidth=2, color=colors[result], label=labels[result])
+        plt.legend()
+        plt.grid()
+        plt.savefig(f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_time.png")
+    plt.close()
+
