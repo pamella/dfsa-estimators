@@ -154,6 +154,7 @@ def simulate(
 def simulation_plot_graphs(estimator_results):
     colors = ["blue", "green"]
     labels = ["Lower Bound", "Eom-Lee"]
+    markers = ["x", "s"]
     for result in estimator_results:
         plt.xlabel("Número de Etiquetas")
         plt.ylabel("Número de Slots em Colisão")
@@ -163,6 +164,11 @@ def simulation_plot_graphs(estimator_results):
             linewidth=2,
             color=colors[result],
             label=labels[result],
+            marker=markers[result],
+        )
+        plt.xticks(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_tags_interval"],
         )
         plt.legend()
         plt.grid(True)
@@ -180,6 +186,11 @@ def simulation_plot_graphs(estimator_results):
             linewidth=2,
             color=colors[result],
             label=labels[result],
+            marker=markers[result],
+        )
+        plt.xticks(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_tags_interval"],
         )
         plt.legend()
         plt.grid(True)
@@ -197,6 +208,11 @@ def simulation_plot_graphs(estimator_results):
             linewidth=2,
             color=colors[result],
             label=labels[result],
+            marker=markers[result],
+        )
+        plt.xticks(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_tags_interval"],
         )
         plt.legend()
         plt.grid(True)
@@ -214,6 +230,11 @@ def simulation_plot_graphs(estimator_results):
             linewidth=2,
             color=colors[result],
             label=labels[result],
+            marker=markers[result],
+        )
+        plt.xticks(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_tags_interval"],
         )
         plt.legend()
         plt.grid(True)
