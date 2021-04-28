@@ -4,6 +4,7 @@ import time
 
 from matplotlib import pyplot as plt
 
+
 def lower_bound(collisions):
     return collisions * 2
 
@@ -128,7 +129,9 @@ def simulate(
 
             list_tags_interval.append(tags)
 
-            print(list_tags_interval, list_avg_collisions, list_avg_slots, list_avg_empty)
+            print(
+                list_tags_interval, list_avg_collisions, list_avg_slots, list_avg_empty
+            )
         graph_plot_file_name_prefix = ""
         if estimator == 0:
             graph_plot_file_name_prefix = "lower_bound"
@@ -142,7 +145,7 @@ def simulate(
             "list_avg_collisions": list_avg_collisions,
             "list_avg_slots": list_avg_slots,
             "list_avg_empty": list_avg_empty,
-            "list_avg_time": list_avg_time
+            "list_avg_time": list_avg_time,
         }
 
         simulation_plot_graphs(estimator_results)
@@ -154,36 +157,67 @@ def simulation_plot_graphs(estimator_results):
     for result in estimator_results:
         plt.xlabel("Número de Etiquetas")
         plt.ylabel("Número de Slots em Colisão")
-        plt.plot(estimator_results[result]['list_tags_interval'], estimator_results[result]['list_avg_collisions'], linewidth=2, color=colors[result], label=labels[result])
+        plt.plot(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_avg_collisions"],
+            linewidth=2,
+            color=colors[result],
+            label=labels[result],
+        )
         plt.legend()
-        plt.grid()
-        plt.savefig(f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_collisions.png")
+        plt.grid(True)
+        plt.savefig(
+            f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_collisions.png"
+        )
     plt.close()
 
     for result in estimator_results:
         plt.xlabel("Número de Etiquetas")
-        plt.ylabel("Número de Slots em Colisão")
-        plt.plot(estimator_results[result]['list_tags_interval'], estimator_results[result]['list_avg_slots'], linewidth=2, color=colors[result], label=labels[result])
+        plt.ylabel("Número de Slots")
+        plt.plot(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_avg_slots"],
+            linewidth=2,
+            color=colors[result],
+            label=labels[result],
+        )
         plt.legend()
-        plt.grid()
-        plt.savefig(f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_idle.png")
+        plt.grid(True)
+        plt.savefig(
+            f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_idle.png"
+        )
     plt.close()
 
     for result in estimator_results:
         plt.xlabel("Número de Etiquetas")
-        plt.ylabel("Número de Slots em Colisão")
-        plt.plot(estimator_results[result]['list_tags_interval'], estimator_results[result]['list_avg_empty'], linewidth=2, color=colors[result], label=labels[result])
+        plt.ylabel("Número de Slots Vazios")
+        plt.plot(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_avg_empty"],
+            linewidth=2,
+            color=colors[result],
+            label=labels[result],
+        )
         plt.legend()
-        plt.grid()
-        plt.savefig(f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_slots.png")
+        plt.grid(True)
+        plt.savefig(
+            f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_slots.png"
+        )
     plt.close()
 
     for result in estimator_results:
         plt.xlabel("Número de Etiquetas")
-        plt.ylabel("Número de Slots em Colisão")
-        plt.plot(estimator_results[result]['list_tags_interval'], estimator_results[result]['list_avg_time'], linewidth=2, color=colors[result], label=labels[result])
+        plt.ylabel("Tempo para Identificação (s)")
+        plt.plot(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_avg_time"],
+            linewidth=2,
+            color=colors[result],
+            label=labels[result],
+        )
         plt.legend()
-        plt.grid()
-        plt.savefig(f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_time.png")
+        plt.grid(True)
+        plt.savefig(
+            f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_time.png"
+        )
     plt.close()
-
