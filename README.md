@@ -1,4 +1,6 @@
 ﻿# DFSA Estimators
+ Projeto baseado no artigo _[Uma Função de Cálculo de Tamanho de Frames para o Protocolo DFSA em Sistemas RFID](https://www.cin.ufpe.br/~pasg/gpublications/AnGo11.pdf)_.
+
  
  ## Requisitos
  - Python 3
