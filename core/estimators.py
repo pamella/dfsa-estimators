@@ -32,8 +32,9 @@ def dfsa(estimator, current_tag, current_frame):
     total_slots = current_frame
     total_collisions = 0
     total_empty = 0
+    total_success = 0
+    total_time = 0
 
-    start_time = time.time()
     while current_tag > 0:
         frame = [0] * current_frame
 
@@ -54,20 +55,24 @@ def dfsa(estimator, current_tag, current_frame):
                 collisions += 1
 
         current_tag -= success
+
         if estimator == 0:
+            start_time = time.time()
             current_frame = lower_bound(collisions)
+            total_time += time.time() - start_time
         elif estimator == 1:
+            start_time = time.time()
             current_frame = eom_lee(collisions, success, current_frame)
+            total_time += time.time() - start_time
         else:
             raise NotImplementedError()
+
         total_collisions += collisions
         total_slots += current_frame
         total_empty += empty
+        total_success += success
 
-    end_time = time.time()
-    total_time = end_time - start_time
-
-    return total_collisions, total_slots, total_empty, total_time
+    return total_collisions, total_slots, total_empty, total_success, total_time
 
 
 def simulate(
@@ -91,6 +96,7 @@ def simulate(
         list_avg_slots = []
         list_avg_empty = []
         list_avg_time = []
+        list_avg_efficiency = []
         for tag_index in range(1, int(max_tag_amount / initial_tag_amount) + 1):
             tags = tag_index * tag_increment_interval
 
@@ -100,6 +106,7 @@ def simulate(
             avg_collisions = 0.0
             avg_slots = 0.0
             avg_empty = 0.0
+            avg_success = 0.0
             avg_time = 0.0
 
             current_repetition = max_repetition
@@ -108,29 +115,40 @@ def simulate(
                 current_tag = tags
                 current_frame = initial_frame_size
 
-                total_collisions, total_slots, total_empty, total_time = dfsa(
-                    estimator, current_tag, current_frame
-                )
+                (
+                    total_collisions,
+                    total_slots,
+                    total_empty,
+                    total_success,
+                    total_time,
+                ) = dfsa(estimator, current_tag, current_frame)
 
                 avg_collisions += total_collisions
                 avg_slots += total_slots
                 avg_empty += total_empty
+                avg_success += total_success
                 avg_time += total_time
 
             avg_collisions /= current_repetition
             avg_slots /= current_repetition
             avg_empty /= current_repetition
+            avg_success /= current_repetition
             avg_time /= current_repetition
 
             list_avg_collisions.append(avg_collisions)
             list_avg_slots.append(avg_slots)
             list_avg_empty.append(avg_empty)
             list_avg_time.append(avg_time)
+            list_avg_efficiency.append(avg_success / avg_slots)
 
             list_tags_interval.append(tags)
 
             print(
-                list_tags_interval, list_avg_collisions, list_avg_slots, list_avg_empty
+                list_tags_interval,
+                list_avg_collisions,
+                list_avg_slots,
+                list_avg_efficiency,
+                list_avg_empty,
             )
         graph_plot_file_name_prefix = ""
         if estimator == 0:
@@ -145,6 +163,7 @@ def simulate(
             "list_avg_collisions": list_avg_collisions,
             "list_avg_slots": list_avg_slots,
             "list_avg_empty": list_avg_empty,
+            "list_avg_efficiency": list_avg_efficiency,
             "list_avg_time": list_avg_time,
         }
 
@@ -170,6 +189,7 @@ def simulation_plot_graphs(estimator_results):
             estimator_results[result]["list_tags_interval"],
             estimator_results[result]["list_tags_interval"],
         )
+        plt.yticks([i * 200 for i in range(10)], [i * 200 for i in range(10)])
         plt.legend()
         plt.grid(True)
         plt.savefig(
@@ -192,6 +212,7 @@ def simulation_plot_graphs(estimator_results):
             estimator_results[result]["list_tags_interval"],
             estimator_results[result]["list_tags_interval"],
         )
+        plt.yticks([i * 500 for i in range(8)], [i * 500 for i in range(8)])
         plt.legend()
         plt.grid(True)
         plt.savefig(
@@ -214,10 +235,33 @@ def simulation_plot_graphs(estimator_results):
             estimator_results[result]["list_tags_interval"],
             estimator_results[result]["list_tags_interval"],
         )
+        plt.yticks([i * 100 for i in range(12)], [i * 100 for i in range(12)])
         plt.legend()
         plt.grid(True)
         plt.savefig(
             f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_empty.png"
+        )
+    plt.close()
+
+    for result in estimator_results:
+        plt.xlabel("Número de Etiquetas")
+        plt.ylabel("Eficiência (total sucessos / total slots)")
+        plt.plot(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_avg_efficiency"],
+            linewidth=2,
+            color=colors[result],
+            label=labels[result],
+            marker=markers[result],
+        )
+        plt.xticks(
+            estimator_results[result]["list_tags_interval"],
+            estimator_results[result]["list_tags_interval"],
+        )
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(
+            f"graph_plots/{estimator_results[result]['graph_plot_file_name_prefix']}_n_efficiency.png"
         )
     plt.close()
 
